@@ -2,21 +2,55 @@ use bevy::{prelude::*, DefaultPlugins};
 
 mod terrain;
 
+use terrain::*;
+use terrain::bundle::TerrainBundle;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(terrain::TerrainPlugin)
-        .add_startup_system(setup)
+        .add_plugin(TerrainPlugin)
+        .add_startup_system(camera_setup)
+        // .add_startup_system(setup)
+        .add_startup_system(terrain_test)
         .run();
+}
+
+fn camera_setup(mut commands: Commands) {
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+}
+
+fn terrain_test(
+    mut commands: Commands,
+    mut terrains: ResMut<Assets<Terrain>>,
+    asset_server: Res<AssetServer>,
+) {
+    let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
+    let terrain = Terrain {
+        name: "Tester".to_owned(),
+        size: IVec3::new(10, 10, 10),
+        heightmap: handle,
+        shade: Color::RED,
+        mesh: Default::default(),
+    };
+
+    let terrain_handle = terrains.add(terrain);
+
+    commands.spawn(TerrainBundle {
+        terrain: terrain_handle,
+        ..Default::default()
+    });
 }
 
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<terrain::TerrainMaterial>>
+    mut materials: ResMut<Assets<TerrainMaterial>>
 ) {
     let mut mesh = Mesh::from(shape::Cube { size: 1.0 });
-    // let attribute_color_values = vec![[0.0, 0.0, 0.0, 1.0]; 24];
+    
     let mesh_vertex_count = 24;
     let attribute_color_values: Vec<_> = (0..mesh_vertex_count).into_iter().map(|i| {
         let hue = i as f32 / mesh_vertex_count as f32 * 360.0;
@@ -37,8 +71,4 @@ fn setup(
         ..default()
     });
 
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
 }

@@ -1,18 +1,28 @@
-use bevy::{prelude::{Plugin, Component, IVec3, Color, Handle, Image, Material, Mesh, MaterialPlugin}, render::{render_resource::{AsBindGroup, VertexFormat}, mesh::MeshVertexAttribute}, reflect::TypeUuid};
+use std::ops::Deref;
+
+use bevy::{prelude::*, render::{render_resource::{AsBindGroup, VertexFormat}, mesh::MeshVertexAttribute}, reflect::TypeUuid};
+
+pub mod bundle;
+mod mesh;
 
 pub struct TerrainPlugin;
 
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_plugin(MaterialPlugin::<TerrainMaterial>::default());
+        app.add_asset::<Terrain>()
+            .add_plugin(MaterialPlugin::<TerrainMaterial>::default())
+            .add_system(terrain_mesh_linker);
     }
 }
 
-#[derive(Component)]
+#[derive(Debug, TypeUuid)]
+#[uuid = "ee330faa-acb4-45b9-9309-c272f1438d7e"]
 pub struct Terrain {
-    size: IVec3,
-    heightmap: Handle<Image>,
-    shade: Color,
+    pub name: String,
+    pub size: IVec3,
+    pub heightmap: Handle<Image>,
+    pub shade: Color,
+    pub mesh: Handle<Mesh>,
 }
 
 pub const ATTRIBUTE_SHADE_COLOR: MeshVertexAttribute =
@@ -46,5 +56,76 @@ impl Material for TerrainMaterial {
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
+    }
+}
+
+fn terrain_mesh_linker(
+    mut commands: Commands,
+    mut terrain_events: EventReader<AssetEvent<Terrain>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut terrains: ResMut<Assets<Terrain>>,
+    mut query: Query<(
+        Entity,
+        &Handle<Terrain>,
+        &mut Handle<Mesh>,
+    )>,
+    changed_handles: Query<Entity, Or<(Changed<Handle<Terrain>>, Added<Handle<Terrain>>)>>,
+) {
+    for event in terrain_events.iter() {
+        match event {
+            AssetEvent::Created { handle } => {
+                for (.., mut mesh) in query.iter_mut()
+                    .filter(|(_, terrain, ..)| terrain == &handle)
+                {
+                    let mut terrain = terrains.get_mut(handle).unwrap();
+                    
+                    mesh::generate_mesh(&mut terrain, &mut meshes);
+
+                    info!(
+                        "Terrain '{}' created. Adding mesh component to entity.",
+                        terrain.name
+                    );
+
+                    *mesh = terrain.mesh.clone().clone();
+                }
+            }
+            AssetEvent::Modified { handle } => {
+                for (.., mut mesh) in query.iter_mut().filter(|(_, terrain, ..)| terrain == &handle)
+                {
+                    let mut terrain = terrains.get_mut(handle).unwrap();
+                    
+                    mesh::generate_mesh(&mut terrain, &mut meshes);
+
+                    info!(
+                        "Terrain '{}' modifierd. Changing mesh component of entity.",
+                        terrain.name
+                    );
+
+                    if mesh.deref() != &terrain.mesh.clone() {
+                        let old_mesh = mesh.clone();
+                        *mesh = terrain.mesh.clone().clone();
+                        meshes.remove(old_mesh);
+                    }
+                }
+            }
+            AssetEvent::Removed { handle } => {
+                for (entity, ..) in query.iter_mut().filter(|(_, terrain, ..)| terrain == &handle) {
+                    commands.entity(entity).despawn_recursive();
+                }
+            }
+        }
+    }
+
+    for entity in changed_handles.iter() {
+        let Ok((.., handle, mut mesh))
+            = query.get_mut(entity) else { continue };
+        let Some(terrain) = terrains.get(handle) else { continue };
+        
+        info!(
+            "Terrain handle for entity '{:?}' modified. Changing mesh component of entity.",
+            entity
+        );
+
+        *mesh = terrain.mesh.clone().clone();
     }
 }
