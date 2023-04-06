@@ -10,7 +10,6 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(TerrainPlugin)
-        // .add_startup_system(camera_setup)
         .add_startup_system(terrain_test)
         .add_plugin(PlayerPlugin)
         .run();
@@ -22,10 +21,10 @@ fn terrain_test(
     mut materials: ResMut<Assets<TerrainMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    let handle: Handle<Image> = asset_server.load("images/small.png");
+    let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
     let terrain = Terrain::new(
         "Tester".to_owned(),
-        Vec3::new(2.0, 0.5, 2.0),
+        Vec3::new(20.0, 2.0, 20.0),
         handle,
     );
 

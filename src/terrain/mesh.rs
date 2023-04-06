@@ -65,9 +65,11 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     let mut line_indices = Vec::with_capacity(positions.len() * 2);
 
-    for i in 0..(positions.len() as u32) - 1 {
-        line_indices.push(i);
-        line_indices.push(i + 1);
+    for w in 0..(width_resolution as u32) - 1 {
+        for l in 0..(lengh_resolution as u32) {
+            line_indices.push(w + (l * width_resolution as u32));
+            line_indices.push(w + 1 + (l * width_resolution as u32));
+        }
     }
 
     mesh.insert_attribute(
