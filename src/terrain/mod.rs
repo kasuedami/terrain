@@ -18,16 +18,14 @@ impl Plugin for TerrainPlugin {
 #[derive(Debug, TypeUuid)]
 #[uuid = "ee330faa-acb4-45b9-9309-c272f1438d7e"]
 pub struct Terrain {
-    name: String,
     size: Vec3,
     heightmap: Handle<Image>,
     mesh: Handle<Mesh>,
 }
 
 impl Terrain {
-    pub fn new(name: String, size: Vec3, heightmap: Handle<Image>) -> Self {
+    pub fn new(size: Vec3, heightmap: Handle<Image>) -> Self {
         Terrain {
-            name,
             size,
             heightmap,
             mesh: Default::default(),
@@ -94,8 +92,8 @@ fn terrain_mesh_linker(
                     mesh::generate_mesh(terrain, &mut meshes, &images);
             
                     info!(
-                        "Terrain '{}' created. Adding mesh component to entity.",
-                        terrain.name
+                        "Terrain '{:?}' created. Adding mesh component to entity.",
+                        terrain
                     );
 
                     *mesh = terrain.mesh.clone().clone();
@@ -109,8 +107,8 @@ fn terrain_mesh_linker(
                     mesh::regenerate_mesh(terrain, &mut meshes, &images);
 
                     info!(
-                        "Terrain '{}' modified. Changing mesh component of entity.",
-                        terrain.name
+                        "Terrain '{:?}' modified. Changing mesh component of entity.",
+                        terrain
                     );
 
                     if mesh.deref() != &terrain.mesh.clone() {

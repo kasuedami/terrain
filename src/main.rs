@@ -22,12 +22,7 @@ fn terrain_test(
     asset_server: Res<AssetServer>,
 ) {
     let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
-    let terrain = Terrain::new(
-        "Tester".to_owned(),
-        Vec3::new(20.0, 2.0, 20.0),
-        handle,
-    );
-
+    let terrain = Terrain::new(Vec3::new(20.0, 2.0, 20.0), handle);
     let terrain_handle = terrains.add(terrain);
 
     commands.spawn(TerrainBundle {
