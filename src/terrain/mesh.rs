@@ -27,7 +27,7 @@ pub fn regenerate_mesh(terrain: &Terrain, meshes: &mut ResMut<Assets<Mesh>>, ima
 
 fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     
-    let mut mesh = Mesh::new(PrimitiveTopology::LineList);
+    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let total_width = terrain.size.x;
     let total_length = terrain.size.z;
     let half_width = total_width / 2.0;
@@ -36,12 +36,12 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     let heightmap = images.get(&terrain.heightmap).unwrap();
     let width_resolution = heightmap.size().x as usize;
-    let lengh_resolution = heightmap.size().y as usize;
+    let lenght_resolution = heightmap.size().y as usize;
     
-    let mut positions = Vec::with_capacity(width_resolution * lengh_resolution);
-    let mut shade_colors = Vec::with_capacity(width_resolution * lengh_resolution);
+    let mut positions = Vec::with_capacity(width_resolution * lenght_resolution);
+    let mut shade_colors = Vec::with_capacity(width_resolution * lenght_resolution);
 
-    for y in 0..lengh_resolution {
+    for y in 0..lenght_resolution {
         for x in 0..width_resolution {
             // currently only for 4 channel
             let point_index = y * width_resolution + x;
@@ -50,14 +50,14 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
             let height = normalized_height * max_height;
             
             let width_position = (x as f32 / width_resolution as f32) * total_width - half_width;
-            let length_position = (y as f32 / lengh_resolution as f32) * total_length - half_length;
+            let length_position = (y as f32 / lenght_resolution as f32) * total_length - half_length;
 
             positions.push([width_position, height, length_position]);
 
             let lower_hue = (x as f32 / width_resolution as f32) * 18.0 + 1.0;
-            let upper_hue = (y as f32 / lengh_resolution as f32) * 18.0 + 1.0;
+            let upper_hue = (y as f32 / lenght_resolution as f32) * 18.0 + 1.0;
             let total_hue = lower_hue * upper_hue;
-            let color = Color::Hsla { hue: total_hue, saturation: 1.0, lightness: 0.5, alpha: 1.0 };
+            let color = Color::Hsla { hue: total_hue, saturation: 0.8, lightness: 0.3, alpha: 1.0 };
             
             shade_colors.push(color.as_rgba_f32());
         }
@@ -65,10 +65,20 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     let mut line_indices = Vec::with_capacity(positions.len() * 2);
 
-    for w in 0..(width_resolution as u32) - 1 {
-        for l in 0..(lengh_resolution as u32) {
-            line_indices.push(w + (l * width_resolution as u32));
-            line_indices.push(w + 1 + (l * width_resolution as u32));
+    for l in 0..(lenght_resolution as u32) - 1 {
+        for w in 0..(width_resolution as u32) - 1 {
+            let first = l * (width_resolution as u32) + w;
+            let second = first + 1;
+            let thrid = (l + 1) * (width_resolution as u32) + w;
+            let fourth = thrid + 1;
+
+            line_indices.push(first);
+            line_indices.push(thrid);
+            line_indices.push(second);
+            
+            line_indices.push(thrid);
+            line_indices.push(fourth);
+            line_indices.push(second);
         }
     }
 
@@ -84,12 +94,12 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_NORMAL,
-        vec![[0.0, 1.0, 0.0]; width_resolution * lengh_resolution],
+        vec![[0.0, 1.0, 0.0]; width_resolution * lenght_resolution],
     );
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_UV_0,
-        vec![[0.0, 0.0]; width_resolution * lengh_resolution],
+        vec![[0.0, 0.0]; width_resolution * lenght_resolution],
     );
 
     mesh.set_indices(Some(mesh::Indices::U32(
