@@ -30,7 +30,7 @@ fn terrain_test(
     let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
     let terrain = Terrain::new(
         "Tester".to_owned(),
-        IVec3::new(1, 1, 10),
+        IVec3::new(2, 1, 2),
         handle,
         Color::RED);
 

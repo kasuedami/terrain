@@ -29,7 +29,7 @@ fn caluclate_mesh(terrain: &Terrain) -> Mesh {
     
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let half_width = terrain.size.x as f32 / 2.0;
-    let half_length = terrain.size.y as f32 / 2.0;
+    let half_length = terrain.size.z as f32 / 2.0;
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_POSITION, 
@@ -38,7 +38,7 @@ fn caluclate_mesh(terrain: &Terrain) -> Mesh {
             [ half_width, 0.0, -half_length],
             [-half_width, 0.0,  half_length],
             [ half_width, 0.0,  half_length],
-            ],
+        ],
     );
     
     mesh.insert_attribute(
