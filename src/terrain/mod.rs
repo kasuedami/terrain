@@ -18,11 +18,25 @@ impl Plugin for TerrainPlugin {
 #[derive(Debug, TypeUuid)]
 #[uuid = "ee330faa-acb4-45b9-9309-c272f1438d7e"]
 pub struct Terrain {
-    pub name: String,
-    pub size: IVec3,
-    pub heightmap: Handle<Image>,
-    pub shade: Color,
-    pub mesh: Handle<Mesh>,
+    name: String,
+    size: IVec3,
+    heightmap: Handle<Image>,
+    shade: Color,
+    mesh: Handle<Mesh>,
+}
+
+impl Terrain {
+    pub fn new(name: String, size: IVec3, heightmap: Handle<Image>, shade: Color) -> Self {
+        let terrain = Terrain {
+            name,
+            size,
+            heightmap,
+            shade,
+            mesh: Default::default(),
+        };
+
+        terrain
+    }
 }
 
 pub const ATTRIBUTE_SHADE_COLOR: MeshVertexAttribute =
@@ -78,9 +92,8 @@ fn terrain_mesh_linker(
                     .filter(|(_, terrain, ..)| terrain == &handle)
                 {
                     let mut terrain = terrains.get_mut(handle).unwrap();
-                    
                     mesh::generate_mesh(&mut terrain, &mut meshes);
-
+            
                     info!(
                         "Terrain '{}' created. Adding mesh component to entity.",
                         terrain.name
@@ -92,12 +105,16 @@ fn terrain_mesh_linker(
             AssetEvent::Modified { handle } => {
                 for (.., mut mesh) in query.iter_mut().filter(|(_, terrain, ..)| terrain == &handle)
                 {
-                    let mut terrain = terrains.get_mut(handle).unwrap();
-                    
-                    mesh::generate_mesh(&mut terrain, &mut meshes);
+                    let terrain = terrains.get(handle).unwrap();
+            
+                    // let mut terrain_mesh = meshes.get_mut(&terrain.mesh);
+
+                    // terrain_mesh
+
+                    mesh::regenerate_mesh(terrain, &mut meshes);
 
                     info!(
-                        "Terrain '{}' modifierd. Changing mesh component of entity.",
+                        "Terrain '{}' modified. Changing mesh component of entity.",
                         terrain.name
                     );
 

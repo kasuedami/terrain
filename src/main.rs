@@ -25,21 +25,21 @@ fn camera_setup(mut commands: Commands) {
 fn terrain_test(
     mut commands: Commands,
     mut terrains: ResMut<Assets<Terrain>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
     let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
-    let terrain = Terrain {
-        name: "Tester".to_owned(),
-        size: IVec3::new(10, 10, 10),
-        heightmap: handle,
-        shade: Color::RED,
-        mesh: Default::default(),
-    };
+    let terrain = Terrain::new(
+        "Tester".to_owned(),
+        IVec3::new(10, 10, 10),
+        handle,
+        Color::RED);
 
     let terrain_handle = terrains.add(terrain);
 
     commands.spawn(TerrainBundle {
         terrain: terrain_handle,
+        material: materials.add(TerrainMaterial { color: Color::WHITE }),
         ..Default::default()
     });
 }
@@ -61,7 +61,7 @@ fn setup(
     dbg!(&attribute_color_values);
 
     mesh.insert_attribute(terrain::ATTRIBUTE_SHADE_COLOR, attribute_color_values);
-
+    
     commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(mesh),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
