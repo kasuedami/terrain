@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use super::{Terrain, TerrainMaterial};
 
-#[derive(Bundle)]
+#[derive(Bundle, Default)]
 pub struct TerrainBundle {
     pub terrain: Handle<Terrain>,
     pub mesh: Handle<Mesh>,
@@ -13,18 +13,4 @@ pub struct TerrainBundle {
     pub visibility: Visibility,
     pub computed_visibility: ComputedVisibility,
     pub material: Handle<TerrainMaterial>,
-}
-
-impl Default for TerrainBundle {
-    fn default() -> Self {
-        Self {
-            terrain: Default::default(),
-            mesh: Default::default(),
-            transform: Transform::default(),
-            global_transform: GlobalTransform::default(),
-            visibility: Visibility::default(),
-            computed_visibility: ComputedVisibility::default(),
-            material: Default::default(),
-        }
-    }
 }

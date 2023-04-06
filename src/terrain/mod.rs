@@ -26,14 +26,12 @@ pub struct Terrain {
 
 impl Terrain {
     pub fn new(name: String, size: Vec3, heightmap: Handle<Image>) -> Self {
-        let terrain = Terrain {
+        Terrain {
             name,
             size,
             heightmap,
             mesh: Default::default(),
-        };
-
-        terrain
+        }
     }
 }
 
@@ -71,6 +69,8 @@ impl Material for TerrainMaterial {
     }
 }
 
+type QueryCondition = Or<(Changed<Handle<Terrain>>, Added<Handle<Terrain>>)>;
+
 fn terrain_mesh_linker(
     mut commands: Commands,
     mut terrain_events: EventReader<AssetEvent<Terrain>>,
@@ -82,7 +82,7 @@ fn terrain_mesh_linker(
         &Handle<Terrain>,
         &mut Handle<Mesh>,
     )>,
-    changed_handles: Query<Entity, Or<(Changed<Handle<Terrain>>, Added<Handle<Terrain>>)>>,
+    changed_handles: Query<Entity, QueryCondition>,
 ) {
     for event in terrain_events.iter() {
         match event {
@@ -90,8 +90,8 @@ fn terrain_mesh_linker(
                 for (.., mut mesh) in query.iter_mut()
                     .filter(|(_, terrain, ..)| terrain == &handle)
                 {
-                    let mut terrain = terrains.get_mut(handle).unwrap();
-                    mesh::generate_mesh(&mut terrain, &mut meshes, &images);
+                    let terrain = terrains.get_mut(handle).unwrap();
+                    mesh::generate_mesh(terrain, &mut meshes, &images);
             
                     info!(
                         "Terrain '{}' created. Adding mesh component to entity.",

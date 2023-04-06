@@ -103,8 +103,8 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 fn caluclate_flat_mesh(terrain: &Terrain) -> Mesh {
     
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let total_width = terrain.size.x as f32;
-    let total_length = terrain.size.z as f32;
+    let total_width = terrain.size.x;
+    let total_length = terrain.size.z;
     let half_width = total_width / 2.0;
     let half_length = total_length / 2.0;
 
