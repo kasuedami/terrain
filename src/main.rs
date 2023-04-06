@@ -27,7 +27,7 @@ fn terrain_test(
     mut materials: ResMut<Assets<TerrainMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
+    let handle: Handle<Image> = asset_server.load("images/small.png");
     let terrain = Terrain::new(
         "Tester".to_owned(),
         IVec3::new(2, 1, 2),

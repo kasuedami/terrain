@@ -78,6 +78,7 @@ fn terrain_mesh_linker(
     mut terrain_events: EventReader<AssetEvent<Terrain>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut terrains: ResMut<Assets<Terrain>>,
+    images: Res<Assets<Image>>,
     mut query: Query<(
         Entity,
         &Handle<Terrain>,
@@ -92,7 +93,7 @@ fn terrain_mesh_linker(
                     .filter(|(_, terrain, ..)| terrain == &handle)
                 {
                     let mut terrain = terrains.get_mut(handle).unwrap();
-                    mesh::generate_mesh(&mut terrain, &mut meshes);
+                    mesh::generate_mesh(&mut terrain, &mut meshes, &images);
             
                     info!(
                         "Terrain '{}' created. Adding mesh component to entity.",
@@ -107,7 +108,7 @@ fn terrain_mesh_linker(
                     .filter(|(_, terrain, ..)| terrain == &handle)
                 {
                     let terrain = terrains.get(handle).unwrap();
-                    mesh::regenerate_mesh(terrain, &mut meshes);
+                    mesh::regenerate_mesh(terrain, &mut meshes, &images);
 
                     info!(
                         "Terrain '{}' modified. Changing mesh component of entity.",

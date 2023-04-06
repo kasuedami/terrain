@@ -3,9 +3,9 @@ use super::{Terrain, ATTRIBUTE_SHADE_COLOR};
 use bevy::prelude::*;
 use bevy::render::mesh::{self, PrimitiveTopology};
 
-pub fn generate_mesh(mut terrain: &mut Terrain, meshes: &mut ResMut<Assets<Mesh>>) {
+pub fn generate_mesh(mut terrain: &mut Terrain, meshes: &mut ResMut<Assets<Mesh>>, images: &Res<Assets<Image>>) {
     let current_mesh = meshes.get(&terrain.mesh);
-    let new_mesh = caluclate_mesh(terrain);
+    let new_mesh = caluclate_mesh(terrain, images);
 
     if current_mesh.is_some() {
         let current_mesh = meshes.get_mut(&terrain.mesh).unwrap();
@@ -17,19 +17,87 @@ pub fn generate_mesh(mut terrain: &mut Terrain, meshes: &mut ResMut<Assets<Mesh>
     }
 }
 
-pub fn regenerate_mesh(terrain: &Terrain, meshes: &mut ResMut<Assets<Mesh>>) {
+pub fn regenerate_mesh(terrain: &Terrain, meshes: &mut ResMut<Assets<Mesh>>, images: &Res<Assets<Image>>) {
     let current_mesh = meshes.get_mut(&terrain.mesh);
     
     if let Some(current_mesh) = current_mesh {
-        *current_mesh = caluclate_mesh(terrain);
+        *current_mesh = caluclate_mesh(terrain, images);
     }
 }
 
-fn caluclate_mesh(terrain: &Terrain) -> Mesh {
+fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
+    
+    let mut mesh = Mesh::new(PrimitiveTopology::LineList);
+    let total_width = terrain.size.x as f32;
+    let total_length = terrain.size.z as f32;
+    let half_width = total_width / 2.0;
+    let half_length = total_length / 2.0;
+    let max_height = terrain.size.y as f32;
+
+    let heightmap = images.get(&terrain.heightmap).unwrap();
+    let width_resolution = heightmap.size().x as usize;
+    let lengh_resolution = heightmap.size().y as usize;
+    
+    let mut positions = Vec::with_capacity(width_resolution * lengh_resolution);
+    let mut shade_colors = Vec::with_capacity(width_resolution * lengh_resolution);
+
+    for y in 0..lengh_resolution {
+        for x in 0..width_resolution {
+            // currently only for grayscale
+            let raw_height = heightmap.data[y * width_resolution + x];
+            let height = raw_height as f32 / 255.0 * max_height;
+            
+            let width_position = x as f32 / total_width - half_width;
+            let length_position = y as f32 / total_length - half_length;
+
+            positions.push([width_position, height, length_position]);
+
+            let color = Color::Hsla { hue: x as f32 / total_width, saturation: y as f32 / total_length, lightness: 1.0, alpha: 1.0 };
+            shade_colors.push(color.as_rgba_f32());
+        }
+    }
+
+    let mut line_indices = Vec::with_capacity(positions.len() * 2);
+
+    for i in 0..(positions.len() as u32) - 1 {
+        line_indices.push(i);
+        line_indices.push(i + 1);
+    }
+
+    mesh.insert_attribute(
+        Mesh::ATTRIBUTE_POSITION, 
+        positions,
+    );
+    
+    mesh.insert_attribute(
+        ATTRIBUTE_SHADE_COLOR, 
+        shade_colors,
+    );
+
+    mesh.insert_attribute(
+        Mesh::ATTRIBUTE_NORMAL,
+        vec![[0.0, 1.0, 0.0]; width_resolution * lengh_resolution],
+    );
+
+    mesh.insert_attribute(
+        Mesh::ATTRIBUTE_UV_0,
+        vec![[0.0, 0.0]; width_resolution * lengh_resolution],
+    );
+
+    mesh.set_indices(Some(mesh::Indices::U32(
+        line_indices
+    )));
+    
+    mesh
+}
+
+fn caluclate_flat_mesh(terrain: &Terrain) -> Mesh {
     
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let half_width = terrain.size.x as f32 / 2.0;
-    let half_length = terrain.size.z as f32 / 2.0;
+    let total_width = terrain.size.x as f32;
+    let total_length = terrain.size.z as f32;
+    let half_width = total_width / 2.0;
+    let half_length = total_length / 2.0;
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_POSITION, 
