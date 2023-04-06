@@ -103,14 +103,10 @@ fn terrain_mesh_linker(
                 }
             }
             AssetEvent::Modified { handle } => {
-                for (.., mut mesh) in query.iter_mut().filter(|(_, terrain, ..)| terrain == &handle)
+                for (.., mut mesh) in query.iter_mut()
+                    .filter(|(_, terrain, ..)| terrain == &handle)
                 {
                     let terrain = terrains.get(handle).unwrap();
-            
-                    // let mut terrain_mesh = meshes.get_mut(&terrain.mesh);
-
-                    // terrain_mesh
-
                     mesh::regenerate_mesh(terrain, &mut meshes);
 
                     info!(
