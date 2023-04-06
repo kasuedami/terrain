@@ -19,19 +19,17 @@ impl Plugin for TerrainPlugin {
 #[uuid = "ee330faa-acb4-45b9-9309-c272f1438d7e"]
 pub struct Terrain {
     name: String,
-    size: IVec3,
+    size: Vec3,
     heightmap: Handle<Image>,
-    shade: Color,
     mesh: Handle<Mesh>,
 }
 
 impl Terrain {
-    pub fn new(name: String, size: IVec3, heightmap: Handle<Image>, shade: Color) -> Self {
+    pub fn new(name: String, size: Vec3, heightmap: Handle<Image>) -> Self {
         let terrain = Terrain {
             name,
             size,
             heightmap,
-            shade,
             mesh: Default::default(),
         };
 

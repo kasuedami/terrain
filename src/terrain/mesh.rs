@@ -28,11 +28,11 @@ pub fn regenerate_mesh(terrain: &Terrain, meshes: &mut ResMut<Assets<Mesh>>, ima
 fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     
     let mut mesh = Mesh::new(PrimitiveTopology::LineList);
-    let total_width = terrain.size.x as f32;
-    let total_length = terrain.size.z as f32;
+    let total_width = terrain.size.x;
+    let total_length = terrain.size.z;
     let half_width = total_width / 2.0;
     let half_length = total_length / 2.0;
-    let max_height = terrain.size.y as f32;
+    let max_height = terrain.size.y;
 
     let heightmap = images.get(&terrain.heightmap).unwrap();
     let width_resolution = heightmap.size().x as usize;
@@ -43,16 +43,22 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     for y in 0..lengh_resolution {
         for x in 0..width_resolution {
-            // currently only for grayscale
-            let raw_height = heightmap.data[y * width_resolution + x];
-            let height = raw_height as f32 / 255.0 * max_height;
+            // currently only for 4 channel
+            let point_index = y * width_resolution + x;
+            let raw_height = heightmap.data[point_index * 4];
+            let normalized_height = raw_height as f32 / 255.0;
+            let height = normalized_height * max_height;
             
-            let width_position = x as f32 / total_width - half_width;
-            let length_position = y as f32 / total_length - half_length;
+            let width_position = (x as f32 / width_resolution as f32) * total_width - half_width;
+            let length_position = (y as f32 / lengh_resolution as f32) * total_length - half_length;
 
             positions.push([width_position, height, length_position]);
 
-            let color = Color::Hsla { hue: x as f32 / total_width, saturation: y as f32 / total_length, lightness: 1.0, alpha: 1.0 };
+            let lower_hue = (x as f32 / width_resolution as f32) * 18.0 + 1.0;
+            let upper_hue = (y as f32 / lengh_resolution as f32) * 18.0 + 1.0;
+            let total_hue = lower_hue * upper_hue;
+            let color = Color::Hsla { hue: total_hue, saturation: 1.0, lightness: 0.5, alpha: 1.0 };
+            
             shade_colors.push(color.as_rgba_f32());
         }
     }
@@ -91,6 +97,7 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     mesh
 }
 
+#[allow(dead_code)]
 fn caluclate_flat_mesh(terrain: &Terrain) -> Mesh {
     
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);

@@ -1,4 +1,5 @@
 use bevy::{prelude::*, DefaultPlugins};
+use bevy_flycam::prelude::*;
 
 mod terrain;
 
@@ -9,16 +10,10 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(TerrainPlugin)
-        .add_startup_system(camera_setup)
+        // .add_startup_system(camera_setup)
         .add_startup_system(terrain_test)
+        .add_plugin(PlayerPlugin)
         .run();
-}
-
-fn camera_setup(mut commands: Commands) {
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
 }
 
 fn terrain_test(
@@ -30,9 +25,9 @@ fn terrain_test(
     let handle: Handle<Image> = asset_server.load("images/small.png");
     let terrain = Terrain::new(
         "Tester".to_owned(),
-        IVec3::new(2, 1, 2),
+        Vec3::new(2.0, 0.5, 2.0),
         handle,
-        Color::RED);
+    );
 
     let terrain_handle = terrains.add(terrain);
 
