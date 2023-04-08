@@ -46,6 +46,7 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     // allocations during mesh construction
     let mut positions = Vec::with_capacity(vertices_count);
     let mut shade_colors = Vec::with_capacity(vertices_count);
+    let mut uvs = Vec::with_capacity(vertices_count);
 
     for y in 0..length_resolution {
         for x in 0..width_resolution {
@@ -62,10 +63,13 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
             // calculate the actual height by multiplying with max_height
             let height = normalized_height * max_height;
             
-            // calculate 'percentage of loop variable in their resolution
+            // calculate 'percentage' of loop variable in their resolution
             // before scaling with the total size and offseting them by half
-            let width_position = (x as f32 / width_resolution as f32) * total_width - half_width;
-            let length_position = (y as f32 / length_resolution as f32) * total_length - half_length;
+            // the percentage varibales also equal the uv coordiante of the vertex
+            let width_percentage = x as f32 / width_resolution as f32;
+            let length_percentage = y as f32 / length_resolution as f32;
+            let width_position = width_percentage * total_width - half_width;
+            let length_position = length_percentage * total_length - half_length;
 
             // push the calculated position into the positions vector
             positions.push([width_position, height, length_position]);
@@ -78,6 +82,9 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
             
             // push the calculated color into the shade_colors vector
             shade_colors.push(color.as_rgba_f32());
+
+            // push uv coordinates into the uvs vector
+            uvs.push([width_percentage, length_percentage]);
         }
     }
 
@@ -127,9 +134,14 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
         vec![[0.0, 1.0, 0.0]; width_resolution * length_resolution],
     );
 
+    // mesh.insert_attribute(
+    //     Mesh::ATTRIBUTE_UV_0,
+    //     uvs,
+    // );
+
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_UV_0,
-        vec![[0.0, 0.0]; width_resolution * length_resolution],
+        vec![[0.0, 0.0]; vertices_count],
     );
 
     mesh.set_indices(Some(mesh::Indices::U32(
