@@ -91,10 +91,7 @@ fn terrain_mesh_linker(
                     let terrain = terrains.get_mut(handle).unwrap();
                     mesh::generate_mesh(terrain, &mut meshes, &images);
             
-                    info!(
-                        "Terrain '{:?}' created. Adding mesh component to entity.",
-                        terrain
-                    );
+                    info!("Some terrain created. Adding mesh component to entity.");
 
                     *mesh = terrain.mesh.clone().clone();
                 }
@@ -106,10 +103,7 @@ fn terrain_mesh_linker(
                     let terrain = terrains.get(handle).unwrap();
                     mesh::regenerate_mesh(terrain, &mut meshes, &images);
 
-                    info!(
-                        "Terrain '{:?}' modified. Changing mesh component of entity.",
-                        terrain
-                    );
+                    info!("Some terrain modified. Changing mesh component of entity.");
 
                     if mesh.deref() != &terrain.mesh.clone() {
                         let old_mesh = mesh.clone();
