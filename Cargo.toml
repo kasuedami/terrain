@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.10.0", features = ["wayland"] }
 bevy_flycam = "*"
+bevy_mod_picking = "0.12.0"
