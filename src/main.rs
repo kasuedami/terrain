@@ -1,3 +1,4 @@
+use bevy::diagnostic::{LogDiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
 use bevy::{prelude::*, DefaultPlugins};
 use bevy_flycam::prelude::*;
 
@@ -14,6 +15,8 @@ fn main() {
         .add_plugin(NoCameraPlayerPlugin)
         .add_plugins(DefaultPickingPlugins)
         .add_plugin(DebugCursorPickingPlugin)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup_camera)
         .add_startup_system(terrain_test)
         .run();

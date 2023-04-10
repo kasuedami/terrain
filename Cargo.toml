@@ -6,6 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.10.0", features = ["wayland"] }
+bevy = "0.10.0"
 bevy_flycam = "*"
 bevy_mod_picking = "0.12.0"
+
+[profile.dev.package."*"]
+opt-level = 3
