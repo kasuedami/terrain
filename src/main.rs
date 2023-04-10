@@ -4,7 +4,7 @@ use bevy_flycam::prelude::*;
 
 mod terrain;
 
-use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DefaultPickingPlugins, DebugCursorPickingPlugin};
+use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DebugCursorPickingPlugin, DebugEventsPickingPlugin, PickingPlugin, InteractablePickingPlugin};
 use terrain::*;
 use terrain::bundle::TerrainBundle;
 
@@ -13,8 +13,10 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(TerrainPlugin)
         .add_plugin(NoCameraPlayerPlugin)
-        .add_plugins(DefaultPickingPlugins)
+        .add_plugin(PickingPlugin)
+        .add_plugin(InteractablePickingPlugin)
         .add_plugin(DebugCursorPickingPlugin)
+        .add_plugin(DebugEventsPickingPlugin)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup_camera)
