@@ -141,7 +141,7 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_UV_0,
-        vec![[0.0, 0.0]; vertices_count],
+        uvs,
     );
 
     mesh.set_indices(Some(mesh::Indices::U32(

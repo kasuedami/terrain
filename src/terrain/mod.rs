@@ -2,8 +2,11 @@ use std::ops::Deref;
 
 use bevy::{prelude::*, render::{render_resource::{AsBindGroup, VertexFormat}, mesh::MeshVertexAttribute}, reflect::TypeUuid};
 
+use self::material::TerrainMaterialNew;
+
 pub mod bundle;
 mod mesh;
+pub mod material;
 
 pub struct TerrainPlugin;
 
@@ -11,6 +14,7 @@ impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_asset::<Terrain>()
             .add_plugin(MaterialPlugin::<TerrainMaterial>::default())
+            .add_plugin(MaterialPlugin::<TerrainMaterialNew>::default())
             .add_system(terrain_mesh_linker);
     }
 }
