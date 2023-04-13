@@ -1,4 +1,4 @@
-use super::{Terrain, ATTRIBUTE_SHADE_COLOR};
+use super::Terrain;
 
 use bevy::prelude::*;
 use bevy::render::mesh::{self, PrimitiveTopology};
@@ -122,11 +122,6 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_POSITION, 
         positions,
-    );
-    
-    mesh.insert_attribute(
-        ATTRIBUTE_SHADE_COLOR, 
-        shade_colors,
     );
 
     mesh.insert_attribute(

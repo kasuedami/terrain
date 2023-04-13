@@ -9,7 +9,7 @@ use bevy::{
 
 #[derive(AsBindGroup, Debug, Clone, TypeUuid)]
 #[uuid = "f5469063-e5c4-413d-badf-c672caa9147a"]
-pub struct TerrainMaterialNew {
+pub struct TerrainMaterial {
     #[texture(0)]
     #[sampler(1)]
     atlas: Handle<Image>,
@@ -23,14 +23,14 @@ pub struct TerrainMaterialNew {
     // fourth: Option<Handle<Image>>,
 }
 
-impl TerrainMaterialNew {
+impl TerrainMaterial {
     pub fn new(atlas: Handle<Image>, first: Option<Handle<Image>>) -> Self {
-        TerrainMaterialNew { atlas, first }
+        TerrainMaterial { atlas, first }
     }
 }
 
-impl Material for TerrainMaterialNew {
+impl Material for TerrainMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/terrain_shader_new.wgsl".into()
+        "shaders/terrain_shader.wgsl".into()
     }
 }

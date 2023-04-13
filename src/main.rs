@@ -6,8 +6,8 @@ mod terrain;
 
 use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DebugCursorPickingPlugin, DebugEventsPickingPlugin, PickingPlugin, InteractablePickingPlugin};
 use terrain::*;
-use terrain::bundle::{TerrainBundle, TerrainBundleNew};
-use terrain::material::TerrainMaterialNew;
+use terrain::bundle::TerrainBundle;
+use terrain::material::TerrainMaterial;
 
 fn main() {
     App::new()
@@ -21,7 +21,7 @@ fn main() {
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup_camera)
-        .add_startup_system(terrain_test_new)
+        .add_startup_system(terrain_test)
         .run();
 }
 
@@ -46,33 +46,13 @@ fn terrain_test(
     let terrain = Terrain::new(Vec3::new(20.0, 2.0, 20.0), handle);
     let terrain_handle = terrains.add(terrain);
 
-    commands.spawn((
-        TerrainBundle {
-            terrain: terrain_handle,
-            material: materials.add(TerrainMaterial { color: Color::WHITE }),
-            ..Default::default()
-        },
-        PickableBundle::default(),
-    ));
-}
-
-fn terrain_test_new(
-    mut commands: Commands,
-    mut terrains: ResMut<Assets<Terrain>>,
-    mut materials: ResMut<Assets<TerrainMaterialNew>>,
-    asset_server: Res<AssetServer>,
-) {
-    let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
-    let terrain = Terrain::new(Vec3::new(20.0, 2.0, 20.0), handle);
-    let terrain_handle = terrains.add(terrain);
-
     let atlas: Handle<Image> = asset_server.load("images/atlas.png");
     let first: Handle<Image> = asset_server.load("images/first.png");
 
-    let terrain_material = TerrainMaterialNew::new(atlas, Some(first));
+    let terrain_material = TerrainMaterial::new(atlas, Some(first));
 
     commands.spawn((
-        TerrainBundleNew {
+        TerrainBundle {
             terrain: terrain_handle,
             material: materials.add(terrain_material),
             ..Default::default()
