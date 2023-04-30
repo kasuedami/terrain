@@ -17,14 +17,11 @@ struct FragmentInput {
 
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
-    var color = vec4(1.0, 0.0, 0.0, 1.0);
     var atlas_color = textureSample(atlasTexture, textureSampler, in.uv);
 
     var first_color = textureSample(firstTexture, textureSampler, in.uv) * atlas_color.x;
     var second_color = textureSample(secondTexture, textureSampler, in.uv) * atlas_color.y;
     var third_color = textureSample(secondTexture, textureSampler, in.uv) * atlas_color.z;
 
-    color = first_color + second_color + third_color;
-
-    return color;
+    return first_color + second_color + third_color;
 }
