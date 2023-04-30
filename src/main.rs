@@ -7,7 +7,7 @@ mod terrain;
 use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DebugCursorPickingPlugin, DebugEventsPickingPlugin, PickingPlugin, InteractablePickingPlugin};
 use terrain::*;
 use terrain::bundle::TerrainBundle;
-use terrain::material::TerrainMaterial;
+use terrain::material::{TerrainMaterial, TerrainLayer};
 
 fn main() {
     App::new()
@@ -51,7 +51,13 @@ fn terrain_test(
     let stone_light: Handle<Image> = asset_server.load("images/stone_light.jpeg");
     let stone_dark: Handle<Image> = asset_server.load("images/stone_dark.jpeg");
 
-    let terrain_material = TerrainMaterial::new(atlas, Some(grass), Some(stone_light), Some(stone_dark), None);
+    let layers = vec![
+        TerrainLayer::new(grass, Vec2::ONE),
+        TerrainLayer::new(stone_light, Vec2::ONE),
+        TerrainLayer::new(stone_dark, Vec2::ONE),
+    ];
+
+    let terrain_material = TerrainMaterial::new(atlas, &layers);
 
     commands.spawn((
         TerrainBundle {

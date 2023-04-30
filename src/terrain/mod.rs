@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use bevy::{prelude::*, reflect::TypeUuid};
 
-use self::material::TerrainMaterial;
+use self::material::{TerrainMaterial};
 
 pub mod bundle;
 mod mesh;
