@@ -15,17 +15,29 @@ pub struct TerrainMaterial {
     atlas: Handle<Image>,
     #[texture(2)]
     first: Option<Handle<Image>>,
-    // #[texture(3)]
-    // second: Option<Handle<Image>>,
-    // #[texture(4)]
-    // third: Option<Handle<Image>>,
-    // #[texture(5)]
-    // fourth: Option<Handle<Image>>,
+    #[texture(3)]
+    second: Option<Handle<Image>>,
+    #[texture(4)]
+    third: Option<Handle<Image>>,
+    #[texture(5)]
+    fourth: Option<Handle<Image>>,
 }
 
 impl TerrainMaterial {
-    pub fn new(atlas: Handle<Image>, first: Option<Handle<Image>>) -> Self {
-        TerrainMaterial { atlas, first }
+    pub fn new(
+        atlas: Handle<Image>,
+        first: Option<Handle<Image>>,
+        second: Option<Handle<Image>>,
+        third: Option<Handle<Image>>,
+        fourth: Option<Handle<Image>>
+    ) -> Self {
+        TerrainMaterial {
+            atlas,
+            first,
+            second,
+            third,
+            fourth
+        }
     }
 }
 

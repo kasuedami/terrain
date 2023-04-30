@@ -4,6 +4,10 @@ var atlasTexture: texture_2d<f32>;
 var textureSampler: sampler;
 @group(1) @binding(2)
 var firstTexture: texture_2d<f32>;
+@group(1) @binding(3)
+var secondTexture: texture_2d<f32>;
+@group(1) @binding(4)
+var thirdTexture: texture_2d<f32>;
 
 struct FragmentInput {
     @builtin(front_facing) is_front: bool,
@@ -15,7 +19,12 @@ struct FragmentInput {
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     var color = vec4(1.0, 0.0, 0.0, 1.0);
     var atlas_color = textureSample(atlasTexture, textureSampler, in.uv);
-    color = textureSample(firstTexture, textureSampler, in.uv) * atlas_color.x;
+
+    var first_color = textureSample(firstTexture, textureSampler, in.uv) * atlas_color.x;
+    var second_color = textureSample(secondTexture, textureSampler, in.uv) * atlas_color.y;
+    var third_color = textureSample(secondTexture, textureSampler, in.uv) * atlas_color.z;
+
+    color = first_color + second_color + third_color;
 
     return color;
 }

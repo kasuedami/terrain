@@ -47,9 +47,11 @@ fn terrain_test(
     let terrain_handle = terrains.add(terrain);
 
     let atlas: Handle<Image> = asset_server.load("images/atlas.png");
-    let first: Handle<Image> = asset_server.load("images/first.png");
+    let grass: Handle<Image> = asset_server.load("images/grass.jpeg");
+    let stone_light: Handle<Image> = asset_server.load("images/stone_light.jpeg");
+    let stone_dark: Handle<Image> = asset_server.load("images/stone_dark.jpeg");
 
-    let terrain_material = TerrainMaterial::new(atlas, Some(first));
+    let terrain_material = TerrainMaterial::new(atlas, Some(grass), Some(stone_light), Some(stone_dark), None);
 
     commands.spawn((
         TerrainBundle {
