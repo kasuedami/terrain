@@ -1,127 +1,51 @@
-use std::num::NonZeroU32;
-
 use bevy::{
     prelude::*,
-    render::{render_resource::{
+    render::render_resource::{
         AsBindGroup,
-        ShaderRef, BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType, ShaderStages, SamplerBindingType, TextureSampleType, TextureViewDimension, AsBindGroupError, PreparedBindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource
-    }, renderer::RenderDevice, texture::FallbackImage, render_asset::RenderAssets},
+        ShaderRef, ShaderType,
+    },
     reflect::TypeUuid
 };
 
-#[derive(Debug, Clone, TypeUuid)]
+#[derive(AsBindGroup, Debug, Clone, TypeUuid)]
 #[uuid = "cb732d71-3adc-4ebe-b7c1-3e92a7186f29"]
 pub struct TerrainMaterial {
+    #[sampler(0)]
+    #[texture(1)]    
     atlas: Handle<Image>,
-    layers: [Option<TerrainLayer>; 4],
+    #[texture(2)]
+    red_texture: Option<Handle<Image>>,
+    #[storage(3, read_only)]
+    red_layer: TerrainLayer,
+    #[texture(4)]
+    green_texture: Option<Handle<Image>>,
+    #[storage(5, read_only)]
+    green_layer: TerrainLayer,
+    #[texture(6)]
+    blue_texture: Option<Handle<Image>>,
+    #[storage(7, read_only)]
+    blue_layer: TerrainLayer,
 }
 
 impl TerrainMaterial {
-    pub fn new(atlas: Handle<Image>, layers: &[TerrainLayer]) -> Self {
-        let mut list: [Option<TerrainLayer>; 4] = Default::default();
-        for i in 0..4 {
-            if i < layers.len() {
-                list[i] = Some(layers[i].clone());
-            } else {
-                list[i] = None;
-            }
+    pub fn new(
+        atlas: Handle<Image>,
+        red_texture: Option<Handle<Image>>,
+        red_layer: Option<TerrainLayer>,
+        green_texture: Option<Handle<Image>>,
+        green_layer: Option<TerrainLayer>,
+        blue_texture: Option<Handle<Image>>,
+        blue_layer: Option<TerrainLayer>,
+    ) -> Self {
+        TerrainMaterial {
+            atlas,
+            red_texture,
+            red_layer: red_layer.unwrap_or_default(),
+            green_texture,
+            green_layer: green_layer.unwrap_or_default(),
+            blue_texture,
+            blue_layer: blue_layer.unwrap_or_default(),
         }
-
-        TerrainMaterial { atlas, layers: list }
-    }
-}
-
-impl AsBindGroup for TerrainMaterial {
-    type Data = ();
-
-    fn as_bind_group(
-        &self,
-        layout: &BindGroupLayout,
-        render_device: &RenderDevice,
-        image_assets: &RenderAssets<Image>,
-        fallback_image: &FallbackImage,
-    ) -> Result<PreparedBindGroup<Self::Data>, AsBindGroupError> {
-
-        let atlas = match image_assets.get(&self.atlas) {
-            Some(image) => &*image.texture_view,
-            None => return Err(AsBindGroupError::RetryNextUpdate),
-        };
-
-        let mut images = vec![];
-        for layer in &self.layers {
-            match layer {
-                Some(layer) => {
-                    match image_assets.get(&layer.texture) {
-                        Some(image) => images.push(&*image.texture_view),
-                        None => return Err(AsBindGroupError::RetryNextUpdate),
-                    }
-                },
-                None => {
-                    images.push(&*fallback_image.texture_view);
-                }
-            }
-        }
-        
-        let bind_group = render_device.create_bind_group(&BindGroupDescriptor {
-            label: "terrain_bind_group".into(),
-            layout,
-            entries: &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: BindingResource::Sampler(&fallback_image.sampler),
-                },
-                BindGroupEntry {
-                    binding: 1,
-                    resource: BindingResource::TextureView(&atlas),
-                },
-                BindGroupEntry {
-                    binding: 2,
-                    resource: BindingResource::TextureViewArray(&images[..]),
-                },
-            ],
-        });
-
-        Ok(PreparedBindGroup {
-            bindings: vec![],
-            bind_group,
-            data: (),
-        })
-    }
-
-    fn bind_group_layout(render_device: &RenderDevice) -> BindGroupLayout
-    where
-        Self: Sized {
-        render_device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-            label: "terrain_material_layout".into(),
-            entries: &[
-                BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: ShaderStages::FRAGMENT,
-                    ty: BindingType::Sampler(SamplerBindingType::Filtering),
-                    count: None,
-                },
-                BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: ShaderStages::FRAGMENT,
-                    ty: BindingType::Texture {
-                        sample_type: TextureSampleType::Float { filterable: true },
-                        view_dimension: TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                BindGroupLayoutEntry {
-                    binding: 2,
-                    visibility: ShaderStages::FRAGMENT,
-                    ty: BindingType::Texture {
-                        sample_type: TextureSampleType::Float { filterable: true },
-                        view_dimension: TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: NonZeroU32::new(4 as u32),
-                }
-            ]
-        })
     }
 }
 
@@ -131,14 +55,21 @@ impl Material for TerrainMaterial {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, ShaderType)]
 pub struct TerrainLayer {
-    texture: Handle<Image>,
     scaling: Vec2,
 }
 
 impl TerrainLayer {
-    pub fn new(texture: Handle<Image>, scaling: Vec2) -> Self {
-        TerrainLayer { texture, scaling }
+    pub fn new(scaling: Vec2) -> Self {
+        TerrainLayer {
+            scaling
+        }
+    }
+}
+
+impl Default for TerrainLayer {
+    fn default() -> Self {
+        Self { scaling: Vec2::ONE }
     }
 }

@@ -51,13 +51,15 @@ fn terrain_test(
     let stone_light: Handle<Image> = asset_server.load("images/stone_light.jpeg");
     let stone_dark: Handle<Image> = asset_server.load("images/stone_dark.jpeg");
 
-    let layers = vec![
-        TerrainLayer::new(grass, Vec2::ONE),
-        TerrainLayer::new(stone_light, Vec2::ONE),
-        TerrainLayer::new(stone_dark, Vec2::ONE),
-    ];
-
-    let terrain_material = TerrainMaterial::new(atlas, &layers);
+    let terrain_material = TerrainMaterial::new(
+        atlas,
+        Some(grass),
+        Some(TerrainLayer::new(Vec2::splat(5.0))),
+        Some(stone_light),
+        Some(TerrainLayer::new(Vec2::splat(4.0))),
+        Some(stone_dark),
+        Some(TerrainLayer::new(Vec2::splat(6.0))),
+    );
 
     commands.spawn((
         TerrainBundle {
