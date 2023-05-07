@@ -1,10 +1,10 @@
 use bevy::diagnostic::{LogDiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
 use bevy::{prelude::*, DefaultPlugins};
 use bevy_flycam::prelude::*;
+use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DebugCursorPickingPlugin, DebugEventsPickingPlugin, PickingPlugin, InteractablePickingPlugin};
 
 mod terrain;
 
-use bevy_mod_picking::{PickingCameraBundle, PickableBundle, DebugCursorPickingPlugin, DebugEventsPickingPlugin, PickingPlugin, InteractablePickingPlugin};
 use terrain::*;
 use terrain::bundle::TerrainBundle;
 use terrain::material::{TerrainMaterial, TerrainLayer};
@@ -43,7 +43,7 @@ fn terrain_test(
     asset_server: Res<AssetServer>,
 ) {
     let handle: Handle<Image> = asset_server.load("images/Heightmap.png");
-    let terrain = Terrain::new(Vec3::new(20.0, 2.0, 20.0), handle);
+    let terrain = Terrain::new(Vec3::new(40.0, 2.0, 40.0), handle);
     let terrain_handle = terrains.add(terrain);
 
     let atlas: Handle<Image> = asset_server.load("images/atlas.png");

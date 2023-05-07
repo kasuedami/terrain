@@ -1,3 +1,6 @@
+#import bevy_pbr::mesh_view_bindings
+#import bevy_pbr::mesh_bindings
+
 @group(1) @binding(0)
 var nearest_sampler: sampler;
 @group(1) @binding(1)
@@ -27,11 +30,21 @@ struct FragmentInput {
 
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
-    var atlas_color = textureSample(atlas_texture, nearest_sampler, in.uv);
+    var N = normalize(in.world_normal);
+    var V = normalize(view.world_position.xyz - in.world_position.xyz);
+    let NdotV = max(dot(N, V), 0.0001);
 
-    var red_texture_color = textureSample(red_texture, nearest_sampler, in.uv * red_layer.scaling % vec2(1.0, 1.0)) * atlas_color.x;
-    var green_texture_color = textureSample(green_texture, nearest_sampler, in.uv * green_layer.scaling % vec2(1.0, 1.0)) * atlas_color.y;
-    var blue_texture_color = textureSample(blue_texture, nearest_sampler, in.uv * blue_layer.scaling % vec2(1.0, 1.0)) * atlas_color.z;
+    var total_color = total_texures_color(in.uv);
+
+    return total_color * NdotV;
+}
+
+fn total_texures_color(uv: vec2<f32>) -> vec4<f32> {
+    var atlas_color = textureSample(atlas_texture, nearest_sampler, uv);
+
+    var red_texture_color = textureSample(red_texture, nearest_sampler, uv * red_layer.scaling % vec2(1.0, 1.0)) * atlas_color.x;
+    var green_texture_color = textureSample(green_texture, nearest_sampler, uv * green_layer.scaling % vec2(1.0, 1.0)) * atlas_color.y;
+    var blue_texture_color = textureSample(blue_texture, nearest_sampler, uv * blue_layer.scaling % vec2(1.0, 1.0)) * atlas_color.z;
     
     return red_texture_color + green_texture_color + blue_texture_color;
 }
