@@ -47,6 +47,7 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
     let mut positions = Vec::with_capacity(vertices_count);
     let mut shade_colors = Vec::with_capacity(vertices_count);
     let mut uvs = Vec::with_capacity(vertices_count);
+    let mut normals = vec![[0.0, 0.0, 0.0]; vertices_count];
 
     for y in 0..length_resolution {
         for x in 0..width_resolution {
@@ -116,7 +117,25 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
             indices.push(second);
         }
     }
-    
+
+    for tringle_indices in indices.chunks(3) {
+        let a = positions[tringle_indices[0] as usize];
+        let b = positions[tringle_indices[1] as usize];
+        let c = positions[tringle_indices[2]as usize];
+
+        let b_minus_a = Vec3::from_array(b) - Vec3::from_array(a);
+        let c_minus_a = Vec3::from_array(c) - Vec3::from_array(a);
+        let normal = b_minus_a.cross(c_minus_a).normalize();
+
+        normals[tringle_indices[0] as usize] = (Vec3::from_array(normals[tringle_indices[0] as usize]) + normal).to_array();
+        normals[tringle_indices[1] as usize] = (Vec3::from_array(normals[tringle_indices[1] as usize]) + normal).to_array();
+        normals[tringle_indices[2] as usize] = (Vec3::from_array(normals[tringle_indices[2] as usize]) + normal).to_array();
+    }
+
+    for i in 0..normals.len() {
+        normals[i] = Vec3::from_array(normals[i]).normalize().to_array();
+    }
+
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     
     mesh.insert_attribute(
@@ -126,13 +145,8 @@ fn caluclate_mesh(terrain: &Terrain, images: &Res<Assets<Image>>) -> Mesh {
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_NORMAL,
-        vec![[0.0, 1.0, 0.0]; width_resolution * length_resolution],
+        normals,
     );
-
-    // mesh.insert_attribute(
-    //     Mesh::ATTRIBUTE_UV_0,
-    //     uvs,
-    // );
 
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_UV_0,
