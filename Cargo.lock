@@ -2784,6 +2784,7 @@ dependencies = [
  "bevy",
  "bevy_flycam",
  "bevy_mod_picking",
+ "ron",
  "serde",
 ]
 

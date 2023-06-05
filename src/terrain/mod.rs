@@ -4,8 +4,10 @@ use bevy::{prelude::*, reflect::TypeUuid};
 
 use self::material::{TerrainMaterial};
 
-pub mod bundle;
 mod mesh;
+mod loader;
+
+pub mod bundle;
 pub mod material;
 
 pub struct TerrainPlugin;
@@ -14,7 +16,9 @@ impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_asset::<Terrain>()
             .add_plugin(MaterialPlugin::<TerrainMaterial>::default())
-            .add_system(terrain_mesh_linker);
+            .add_asset_loader(loader::TerrainLoader)
+            .add_system(terrain_mesh_linker)
+            .init_asset_loader::<loader::TerrainLoader>();
     }
 }
 

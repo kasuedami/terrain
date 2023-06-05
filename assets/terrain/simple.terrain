@@ -1,0 +1,8 @@
+(
+    size: (10.0, 2.0, 10.0),
+    heightmap_path: "images/Heightmap.png",
+    atlas_path: "images/atlas.png",
+    layer_red_texture_path: "images/grass.jpeg",
+    layer_green_texture_path: "images/stone_dark.jpeg",
+    layer_blue_texture_path: "images/stone_light.jpeg",
+)

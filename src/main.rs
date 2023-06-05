@@ -61,6 +61,8 @@ fn terrain_test(
         Some(TerrainLayer::new(Vec2::splat(6.0))),
     );
 
+    let loaded_material: Handle<TerrainMaterial> = asset_server.load("terrain/simple.terrain");
+
     commands.spawn((
         TerrainBundle {
             terrain: terrain_handle,
