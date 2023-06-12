@@ -2,7 +2,7 @@ use bevy::{asset::{AssetLoader, LoadedAsset}, prelude::Vec3};
 
 use serde::{Deserialize, Serialize};
 
-use crate::terrain::material::TerrainMaterial;
+use crate::terrain::{Terrain, Layer};
 
 #[derive(Default)]
 pub struct TerrainLoader;
@@ -28,31 +28,36 @@ async fn load_terrain<'de, 'a, 'b>(
 ) -> Result<(), bevy::asset::Error> {
     let asset: TerrainAsset = ron::de::from_bytes(bytes)?;
 
-    // let heightmap_handle = context.get_handle(asset.heightmap_path);
-    let atlas_handle = context.get_handle(asset.atlas_path);
-    let layer_red_texture_handle = context.get_handle(asset.layer_red_texture_path);
-    let layer_green_texture_handle = context.get_handle(asset.layer_green_texture_path);
-    let layer_blue_texture_handle = context.get_handle(asset.layer_blue_texture_path);
+    let heightmap_handle = context.get_handle(asset.heightmap_path.clone());
+    let atlas_handle = context.get_handle(asset.atlas_path.clone());
+    let layer_red_texture_handle = context.get_handle(asset.layer_red_texture_path.clone());
+    let layer_green_texture_handle = context.get_handle(asset.layer_green_texture_path.clone());
+    let layer_blue_texture_handle = context.get_handle(asset.layer_blue_texture_path.clone());
 
-    let terrain = TerrainMaterial::new(
+    let terrain = Terrain::new(
+        asset.size,
+        heightmap_handle,
         atlas_handle,
         Some(layer_red_texture_handle),
-        None,
+        Layer::default(),
         Some(layer_green_texture_handle),
-        None,
+        Layer::default(),
         Some(layer_blue_texture_handle),
-        None
+        Layer::default(),
     );
 
-    // LoadedAsset::new(terrain)
-    //     .with_dependencies(vec![
-    //         asset.atlas_path.into(),
-    //         asset.layer_red_texture_path.into(),
-    //         asset.layer_green_texture_path.into(),
-    //         asset.layer_blue_texture_path.into()
-    //     ]);
+    dbg!(&terrain);
 
-    context.set_default_asset(LoadedAsset::new(terrain));
+    context.set_default_asset(
+        LoadedAsset::new(terrain)
+            .with_dependencies(vec![
+                asset.heightmap_path.into(),
+                asset.atlas_path.into(),
+                asset.layer_red_texture_path.into(),
+                asset.layer_green_texture_path.into(),
+                asset.layer_blue_texture_path.into(),
+            ])
+        );
     
     Ok(())
 }
