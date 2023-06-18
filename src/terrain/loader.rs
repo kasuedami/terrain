@@ -34,6 +34,9 @@ async fn load_terrain<'de, 'a, 'b>(
     let layer_green_texture_handle = context.get_handle(asset.layer_green_texture_path.clone());
     let layer_blue_texture_handle = context.get_handle(asset.layer_blue_texture_path.clone());
 
+    let mesh = crate::terrain::mesh::generate(asset.size, heightmap_handle.clone());
+    let mesh_handle = context.set_labeled_asset("mesh", LoadedAsset::new(mesh));
+
     let terrain = Terrain::new(
         asset.size,
         heightmap_handle,
@@ -44,9 +47,8 @@ async fn load_terrain<'de, 'a, 'b>(
         Layer::default(),
         Some(layer_blue_texture_handle),
         Layer::default(),
+        mesh_handle,
     );
-
-    dbg!(&terrain);
 
     context.set_default_asset(
         LoadedAsset::new(terrain)

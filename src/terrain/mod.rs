@@ -53,6 +53,7 @@ impl Terrain {
         green_layer: Layer,
         blue_texture: Option<Handle<Image>>,
         blue_layer: Layer,
+        mesh: Handle<Mesh>,
     ) -> Self {
         Terrain {
             size,
@@ -64,7 +65,7 @@ impl Terrain {
             green_layer,
             blue_texture,
             blue_layer,
-            mesh: Default::default(),
+            mesh,
         }
     }
 }
@@ -99,20 +100,20 @@ fn terrain_mesh_linker(
                 }
             }
             AssetEvent::Modified { handle } => {
-                for (.., mut mesh) in query.iter_mut()
-                    .filter(|(_, terrain, ..)| terrain == &handle)
-                {
-                    let terrain = terrains.get(handle).unwrap();
-                    mesh::regenerate_mesh(terrain, &mut meshes, &images);
+                // for (.., mut mesh) in query.iter_mut()
+                //     .filter(|(_, terrain, ..)| terrain == &handle)
+                // {
+                //     let terrain = terrains.get(handle).unwrap();
+                //     mesh::regenerate_mesh(terrain, &mut meshes, &images);
 
-                    info!("Some terrain modified. Changing mesh component of entity.");
+                //     info!("Some terrain modified. Changing mesh component of entity.");
 
-                    if mesh.deref() != &terrain.mesh.clone() {
-                        let old_mesh = mesh.clone();
-                        *mesh = terrain.mesh.clone().clone();
-                        meshes.remove(old_mesh);
-                    }
-                }
+                //     if mesh.deref() != &terrain.mesh.clone() {
+                //         let old_mesh = mesh.clone();
+                //         *mesh = terrain.mesh.clone().clone();
+                //         meshes.remove(old_mesh);
+                //     }
+                // }
             }
             AssetEvent::Removed { handle } => {
                 for (entity, ..) in query.iter_mut().filter(|(_, terrain, ..)| terrain == &handle) {
