@@ -5,7 +5,7 @@ use terrain::prelude::*;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin::default().watch_for_changes()))
-        .add_plugin(TerrainPlugin)
+        .add_plugin(TerrainPlugin::default())
         .add_systems(Startup, (setup_camera, terrain_test))
         .run();
 }

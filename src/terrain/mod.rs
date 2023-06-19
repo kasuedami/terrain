@@ -1,20 +1,11 @@
 use bevy::{prelude::*, reflect::{TypeUuid, TypePath}, render::render_resource::{AsBindGroup, ShaderRef, ShaderType}};
 
-mod mesh;
+mod editor;
 mod loader;
+mod mesh;
 
 pub mod bundle;
-
-pub struct TerrainPlugin;
-
-impl Plugin for TerrainPlugin {
-    fn build(&self, app: &mut bevy::prelude::App) {
-        app.init_asset::<Terrain>()
-            .add_plugin(MaterialPlugin::<Terrain>::default())
-            .add_systems(Update, terrain_mesh_linker)
-            .init_asset_loader::<loader::TerrainLoader>();
-    }
-}
+pub mod plugin;
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, TypeUuid, Clone)]
 #[uuid = "ee330faa-acb4-45b9-9309-c272f1438d7e"]
@@ -64,48 +55,6 @@ impl Terrain {
             blue_layer,
             mesh,
         }
-    }
-}
-
-type QueryCondition = Or<(Changed<Handle<Terrain>>, Added<Handle<Terrain>>)>;
-
-fn terrain_mesh_linker(
-    mut commands: Commands,
-    mut terrain_events: EventReader<AssetEvent<Terrain>>,
-    mut terrains: ResMut<Assets<Terrain>>,
-    mut query: Query<(
-        Entity,
-        &Handle<Terrain>,
-        &mut Handle<Mesh>,
-    )>,
-    changed_handles: Query<Entity, QueryCondition>,
-) {
-    for event in terrain_events.iter() {
-        match event {
-            AssetEvent::Added { id, .. } => {
-                for (.., mut mesh) in query.iter_mut()
-                    .filter(|(_, terrain, ..)| terrain.id() == *id)
-                {
-                    let terrain = terrains.get_mut(*id).unwrap();                
-                 
-                    *mesh = terrain.mesh.clone().clone();
-                }
-            },
-            AssetEvent::Removed { id } => {
-                for (entity, ..) in query.iter_mut().filter(|(_, terrain, ..)| terrain.id() == *id) {
-                    commands.entity(entity).despawn_recursive();
-                }
-            },
-            _ => ()
-        }
-    }
-
-    for entity in changed_handles.iter() {
-        let Ok((.., handle, mut mesh))
-            = query.get_mut(entity) else { continue };
-        let Some(terrain) = terrains.get(handle) else { continue };
-
-        *mesh = terrain.mesh.clone().clone();
     }
 }
 
