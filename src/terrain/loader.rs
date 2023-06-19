@@ -1,4 +1,4 @@
-use bevy::{asset::{AssetLoader, LoadedAsset}, prelude::Vec3};
+use bevy::{asset::{AssetLoader, io::Reader, LoadContext, AsyncReadExt}, prelude::{Vec3, Image, Handle}};
 
 use serde::{Deserialize, Serialize};
 
@@ -8,34 +8,43 @@ use crate::terrain::{Terrain, Layer};
 pub struct TerrainLoader;
 
 impl AssetLoader for TerrainLoader {
+    type Asset = Terrain;
+    type Settings = ();
+
     fn extensions(&self) -> &[&str] {
         &["terrain"]
     }
 
     fn load<'a>(
-            &'a self,
-            bytes: &'a [u8],
-            load_context: &'a mut bevy::asset::LoadContext,
-        ) -> bevy::utils::BoxedFuture<'a, Result<(), bevy::asset::Error>> {
-        Box::pin(async move { load_terrain(bytes, load_context).await })
+        &'a self,
+        reader: &'a mut Reader,
+        _settings: &'a (),
+        load_context: &'a mut LoadContext,
+    ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, anyhow::Error>> {
+        Box::pin(async move { load_terrain(reader, load_context).await })
     }
 
 }
 
-async fn load_terrain<'de, 'a, 'b>(
-    bytes: &'a [u8],
+async fn load_terrain<'a, 'b>(
+    reader: &'a mut Reader<'_>,
     context: &'a mut bevy::asset::LoadContext<'b>,
-) -> Result<(), bevy::asset::Error> {
-    let asset: TerrainAsset = ron::de::from_bytes(bytes)?;
+) -> Result<<TerrainLoader as AssetLoader>::Asset, anyhow::Error> {
+    let mut bytes = Vec::new();
+    reader.read_to_end(&mut bytes).await?;
 
-    let heightmap_handle = context.get_handle(asset.heightmap_path.clone());
-    let atlas_handle = context.get_handle(asset.atlas_path.clone());
-    let layer_red_texture_handle = context.get_handle(asset.layer_red_texture_path.clone());
-    let layer_green_texture_handle = context.get_handle(asset.layer_green_texture_path.clone());
-    let layer_blue_texture_handle = context.get_handle(asset.layer_blue_texture_path.clone());
+    let asset: TerrainAsset = ron::de::from_bytes(&bytes)?;
+    let heightmap: Image = context.load_direct(&asset.heightmap_path).await?.take::<Image>().unwrap();
 
-    let mesh = crate::terrain::mesh::generate(asset.size, heightmap_handle.clone());
-    let mesh_handle = context.set_labeled_asset("mesh", LoadedAsset::new(mesh));
+    let heightmap_handle = context.load(&asset.heightmap_path);
+    let atlas_handle = context.load(&asset.atlas_path);
+    let layer_red_texture_handle = context.load(&asset.layer_red_texture_path);
+    let layer_green_texture_handle = context.load(&asset.layer_green_texture_path);
+    let layer_blue_texture_handle = context.load(&asset.layer_blue_texture_path);
+
+
+    let mesh = crate::terrain::mesh::generate(asset.size, heightmap);
+    let mesh_handle = context.add_labeled_asset("mesh".to_owned(), mesh);
 
     let terrain = Terrain::new(
         asset.size,
@@ -50,18 +59,7 @@ async fn load_terrain<'de, 'a, 'b>(
         mesh_handle,
     );
 
-    context.set_default_asset(
-        LoadedAsset::new(terrain)
-            .with_dependencies(vec![
-                asset.heightmap_path.into(),
-                asset.atlas_path.into(),
-                asset.layer_red_texture_path.into(),
-                asset.layer_green_texture_path.into(),
-                asset.layer_blue_texture_path.into(),
-            ])
-        );
-    
-    Ok(())
+    Ok(terrain)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
