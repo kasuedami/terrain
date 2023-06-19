@@ -23,7 +23,6 @@ impl AssetLoader for TerrainLoader {
     ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, anyhow::Error>> {
         Box::pin(async move { load_terrain(reader, load_context).await })
     }
-
 }
 
 async fn load_terrain<'a, 'b>(
