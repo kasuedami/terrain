@@ -1,9 +1,6 @@
 use bevy::{prelude::*, DefaultPlugins};
 
-mod terrain;
-
-use terrain::*;
-use terrain::bundle::TerrainBundle;
+use terrain::prelude::*;
 
 fn main() {
     App::new()

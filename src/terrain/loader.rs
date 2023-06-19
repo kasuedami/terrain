@@ -1,11 +1,11 @@
-use bevy::{asset::{AssetLoader, io::Reader, LoadContext, AsyncReadExt}, prelude::{Vec3, Image, Handle}};
+use bevy::{asset::{AssetLoader, io::Reader, LoadContext, AsyncReadExt}, prelude::{Vec3, Image}};
 
 use serde::{Deserialize, Serialize};
 
 use crate::terrain::{Terrain, Layer};
 
 #[derive(Default)]
-pub struct TerrainLoader;
+pub(crate) struct TerrainLoader;
 
 impl AssetLoader for TerrainLoader {
     type Asset = Terrain;

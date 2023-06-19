@@ -11,7 +11,6 @@ impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.init_asset::<Terrain>()
             .add_plugin(MaterialPlugin::<Terrain>::default())
-            .init_asset_loader::<loader::TerrainLoader>()
             .add_systems(Update, terrain_mesh_linker)
             .init_asset_loader::<loader::TerrainLoader>();
     }

@@ -1,5 +1,3 @@
-use super::Terrain;
-
 use bevy::prelude::*;
 use bevy::render::mesh::{self, PrimitiveTopology};
 
